@@ -1,0 +1,18 @@
+# Redirect www to non-www (301)
+https://www.msaleem-builds.netlify.app/*  https://msaleem-builds.netlify.app/:splat  301
+
+# Redirect index.html to root (canonical)
+/index.html  /  301
+
+# Rewrite privacy-policy to .html file
+/privacy-policy  /privacy-policy.html  200
+
+# Cache static assets (1 year, immutable)
+/style.css*  Cache-Control: max-age=31536000, immutable
+/script.js*  Cache-Control: max-age=31536000, immutable
+/favicon.svg  Cache-Control: max-age=31536000, immutable
+/pfp.jpg  Cache-Control: max-age=31536000, immutable
+/msaleem-cv.pdf  Cache-Control: max-age=31536000, immutable
+
+# Custom 404 (must be last — Netlify auto-serves 404.html for missing files)
+/*  404  /404.html
