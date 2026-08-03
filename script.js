@@ -1,5 +1,128 @@
 // script.js
 
+/* ============================================================
+   SLOW SMOOTH SCROLL ENGINE (lerp-based)
+   Gives the whole page a slow, weighted, premium scrolling feel.
+   Auto-disables for touch devices, small screens, and users who
+   prefer reduced motion, so it never harms usability.
+   ============================================================ */
+(function defineSmoothScroll() {
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const coarsePointer = window.matchMedia('(pointer: coarse)').matches;
+    const smallScreen = window.innerWidth < 768;
+
+    const state = {
+        target: window.pageYOffset,
+        current: window.pageYOffset,
+        raf: null,
+        lastTime: 0,
+        easing: 0.11
+    };
+
+    function maxScroll() {
+        return Math.max(document.documentElement.scrollHeight - window.innerHeight, 0);
+    }
+
+    function step(time) {
+        const dt = Math.min(50, time - state.lastTime || 16.7);
+        state.lastTime = time;
+        // Frame-rate independent smoothing (feels consistent on 60Hz / 120Hz+)
+        const factor = 1 - Math.pow(1 - state.easing, dt / 16.7);
+        state.current += (state.target - state.current) * factor;
+        if (Math.abs(state.target - state.current) < 0.4) {
+            state.current = state.target;
+            window.scrollTo(0, state.current);
+            state.raf = null;
+            return;
+        }
+        window.scrollTo(0, state.current);
+        state.raf = requestAnimationFrame(step);
+    }
+
+    function start() {
+        if (state.raf === null) {
+            state.lastTime = performance.now();
+            state.raf = requestAnimationFrame(step);
+        }
+    }
+
+    function scrollToY(y, immediate) {
+        const clamped = Math.max(0, Math.min(parseFloat(y) || 0, maxScroll()));
+        if (immediate) {
+            state.target = clamped;
+            state.current = clamped;
+            if (state.raf) cancelAnimationFrame(state.raf);
+            state.raf = null;
+            window.scrollTo(0, clamped);
+            return;
+        }
+        state.target = clamped;
+        start();
+    }
+
+    function scrollBy(delta) {
+        state.target = Math.max(0, Math.min(state.target + delta, maxScroll()));
+        start();
+    }
+
+    function sync() {
+        if (!state.raf) {
+            state.target = window.pageYOffset;
+            state.current = window.pageYOffset;
+        }
+    }
+
+    window.SmoothScroll = {
+        enabled: () => !reduceMotion && !coarsePointer && !smallScreen,
+        scrollToY: scrollToY,
+        scrollBy: scrollBy,
+        sync: sync,
+        isAnimating: () => !!state.raf
+    };
+})();
+
+if (typeof window.SmoothScroll !== 'undefined' && window.SmoothScroll.enabled()) {
+    const docEl = document.documentElement;
+    docEl.style.scrollBehavior = 'auto';
+    docEl.style.overscrollBehaviorY = 'none';
+
+    // Never hijack scrolling when the user is typing in a form field
+    const isEditable = (el) => {
+        if (!el || !el.tagName) return false;
+        if (el.isContentEditable) return true;
+        const tag = el.tagName.toLowerCase();
+        return tag === 'input' || tag === 'textarea' || tag === 'select';
+    };
+
+    // Wheel / trackpad -> smooth slow scroll
+    window.addEventListener('wheel', (e) => {
+        if (e.ctrlKey || e.metaKey) return; // keep pinch-zoom working
+        if (isEditable(e.target)) return;   // native scroll inside form fields
+        e.preventDefault();
+        let delta = e.deltaY;
+        if (e.deltaMode === 1) delta *= 16;              // lines -> px
+        else if (e.deltaMode === 2) delta *= window.innerHeight; // pages -> px
+        window.SmoothScroll.scrollBy(delta);
+    }, { passive: false });
+
+    // Keep the engine in sync when the user drags the native scrollbar
+    window.addEventListener('scroll', () => {
+        window.SmoothScroll.sync();
+    }, { passive: true });
+
+    // Keyboard page scroll -> smooth (skipped when typing in a field)
+    document.addEventListener('keydown', (e) => {
+        if (isEditable(e.target)) return;
+        if (['PageDown', 'PageUp', ' ', 'ArrowDown', 'ArrowUp'].includes(e.key)) {
+            const big = e.key === 'PageDown' || e.key === 'PageUp';
+            const down = e.key !== 'PageUp' && e.key !== 'ArrowUp';
+            const delta = (big ? window.innerHeight * 0.85 : 120) * (down ? 1 : -1);
+            e.preventDefault();
+            window.SmoothScroll.scrollBy(delta);
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', (event) => {
     
     // --- 1. Scroll Animation Logic for Sections (.scroll-animate) ---
@@ -33,6 +156,43 @@ document.addEventListener('DOMContentLoaded', (event) => {
         }
         sectionObserver.observe(el);
     });
+
+    // --- 1b. Universal Entrance Reveal ([data-reveal], animation-based & hover-safe) ---
+    const revealItems = document.querySelectorAll('[data-reveal]');
+    if (revealItems.length > 0) {
+        const revealObserverOptions = {
+            root: null,
+            rootMargin: '0px 0px -8% 0px',
+            threshold: 0.1
+        };
+
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const el = entry.target;
+                    el.setAttribute('data-reveal', 'in');
+                    observer.unobserve(el);
+                    // Drop the attribute once the animation ends so hovers/tilt stay normal
+                    el.addEventListener('animationend', function onRevealEnd(e) {
+                        if (e.animationName === 'revealUp') {
+                            el.removeAttribute('data-reveal');
+                            el.removeEventListener('animationend', onRevealEnd);
+                        }
+                    });
+                }
+            });
+        }, revealObserverOptions);
+
+        revealItems.forEach(el => {
+            // Stagger siblings inside grouped layouts
+            if (el.closest('.about-details, .expertise-grid, .timeline, .footer-grid, .contact-wrapper')) {
+                const siblings = Array.from(el.parentElement.children)
+                    .filter(node => node.hasAttribute && node.hasAttribute('data-reveal'));
+                el.style.setProperty('--i', siblings.indexOf(el));
+            }
+            revealObserver.observe(el);
+        });
+    }
 
 
     // --- 2. Sticky Header Fade-in Animation ---
@@ -186,6 +346,12 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
     // --- 6. Custom Smooth Scroll Animation Easing ---
     function smoothScrollTo(targetPosition, duration = 600) {
+        // When the slow smooth-scroll engine is active, hand off to it
+        if (window.SmoothScroll && window.SmoothScroll.enabled()) {
+            window.SmoothScroll.scrollToY(targetPosition);
+            return;
+        }
+
         const startPosition = window.pageYOffset || document.documentElement.scrollTop;
         const distance = targetPosition - startPosition;
         const startTime = performance.now();
@@ -234,6 +400,37 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 
+    // --- 7b. Scroll Progress Bar (top of page) ---
+    const scrollProgress = document.getElementById('scroll-progress');
+    if (scrollProgress) {
+        const updateProgress = () => {
+            const winScroll = document.documentElement.scrollTop || document.body.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = height > 0 ? (winScroll / height) * 100 : 0;
+            scrollProgress.style.width = scrolled + '%';
+        };
+        window.addEventListener('scroll', updateProgress, { passive: true });
+        updateProgress();
+    }
+
+    // --- 7c. Slow Parallax for decorative elements (data-speed attr) ---
+    const parallaxEls = document.querySelectorAll('.parallax-slow');
+    if (parallaxEls.length > 0) {
+        let paraRAF = null;
+        window.addEventListener('scroll', () => {
+            if (!paraRAF) {
+                paraRAF = requestAnimationFrame(() => {
+                    const scrolled = window.pageYOffset;
+                    parallaxEls.forEach(el => {
+                        const speed = parseFloat(el.getAttribute('data-speed')) || 0.18;
+                        el.style.transform = `translate3d(0, ${scrolled * speed}px, 0)`;
+                    });
+                    paraRAF = null;
+                });
+            }
+        }, { passive: true });
+    }
+
     // --- 8. Smooth Scrolling for all Internal Links with Offset Adjustment ---
     document.querySelectorAll('a[href^="#"], a[href^="index.html#"], a[href="index.html"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
@@ -279,10 +476,10 @@ document.addEventListener('DOMContentLoaded', (event) => {
         const target = document.querySelector(window.location.hash);
         if (target) {
             setTimeout(() => {
-                target.scrollIntoView({
-                    behavior: 'smooth',
-                    block: 'start'
-                });
+                const headerOffset = 95;
+                const elementPosition = target.getBoundingClientRect().top;
+                const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+                smoothScrollTo(offsetPosition, 700);
             }, 300);
         }
     }
@@ -460,7 +657,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
 
                     if (distance < 110) {
                         opacityValue = 1 - (distance / 110);
-                        ctx.strokeStyle = `rgba(88, 166, 255, ${opacityValue * 0.15})`;
+                        ctx.strokeStyle = `rgba(88, 166, 255, ${opacityValue * 0.08})`;
                         ctx.lineWidth = 1;
                         ctx.beginPath();
                         ctx.moveTo(particles[a].x, particles[a].y);

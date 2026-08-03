@@ -29,7 +29,7 @@
     <meta name="twitter:image:alt" content="Portrait of Muhammad Saleem, frontend and WordPress developer">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="style.css?v=2.7">
+    <link rel="stylesheet" href="style.css?v=3.0">
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap"></noscript>
@@ -50,6 +50,8 @@
 <body>
 
     <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
 
     <header id="main-header">
         <div class="container nav-bar">
@@ -92,12 +94,12 @@
             <h2 id="privacy-heading" class="visually-hidden">Privacy policy details</h2>
             <div class="about-details privacy-details">
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Introduction</h3>
                     <p>This Privacy Policy describes how I collect, use, and protect your personal information when you visit my portfolio website and use the contact form.</p>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Information Collection</h3>
                     <p>When you use the contact form on this website, I collect the following information:</p>
                     <ul>
@@ -108,7 +110,7 @@
                     <p>This information is collected through Formspree, a third-party form handling service.</p>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>How I Use Your Information</h3>
                     <p>The information you provide through the contact form is used solely for the following purposes:</p>
                     <ul>
@@ -118,13 +120,13 @@
                     </ul>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Data Storage and Security</h3>
                     <p>Your contact form submissions are processed and stored by Formspree. I do not store your personal information on my own servers. Formspree handles data according to their own privacy policy and security measures.</p>
                     <p>I take reasonable measures to protect your information, but please be aware that no method of transmission over the Internet or electronic storage is 100% secure.</p>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Third-Party Services</h3>
                     <p>This website uses the following third-party services:</p>
                     <ul>
@@ -133,7 +135,7 @@
                     </ul>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Your Rights</h3>
                     <p>You have the right to:</p>
                     <ul>
@@ -145,17 +147,17 @@
                     <p>To exercise these rights, please contact me using the contact form or email provided on this website.</p>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Cookies</h3>
                     <p>This website does not use any cookies. Your browsing experience is cookie-free, and no tracking or personal data is stored through cookies on this site.</p>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Changes to This Privacy Policy</h3>
                     <p>I may update this Privacy Policy from time to time. Any changes will be posted on this page with an updated "Last updated" date. I encourage you to review this Privacy Policy periodically.</p>
                 </div>
 
-                <div class="detail-box">
+                <div class="detail-box" data-reveal>
                     <h3>Contact Me</h3>
                     <p>If you have any questions or concerns about this Privacy Policy, please contact me:</p>
                     <ul>
@@ -209,7 +211,7 @@
             </div>
         </div>
         <div class="footer-bottom">
-            <div class="container footer-bottom-layout">
+            <div class="container footer-bottom-layout" data-reveal>
 <p class="copyright">Crafting digital experiences that matter. <span class="copyright-divider" aria-hidden="true">|</span> Every pixel tells a story.</p>
                 <div class="footer-legal">
                     <a href="privacy-policy.html" class="legal-link">Privacy Policy</a>
@@ -222,7 +224,7 @@
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="18 15 12 9 6 15"></polyline></svg>
     </button>
     <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
-    <script src="script.js?v=2.7" defer></script>
+    <script src="script.js?v=3.0" defer></script>
 
 </body>
 </html>
