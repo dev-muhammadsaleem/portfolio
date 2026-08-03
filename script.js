@@ -6,19 +6,33 @@ document.addEventListener('DOMContentLoaded', (event) => {
     const sectionObserverOptions = {
         root: null, 
         rootMargin: '0px',
-        threshold: 0.15 
+        threshold: 0.12 
     };
 
     const sectionObserver = new IntersectionObserver((entries, observer) => {
         entries.forEach(entry => {
             if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
+                const el = entry.target;
+                el.classList.add('visible');
+                observer.unobserve(el);
+                // Clear the stagger delay once the reveal finishes so hovers stay instant
+                const index = parseInt(el.style.getPropertyValue('--i'), 10) || 0;
+                const staggerOffset = el.closest('.project-cards-grid, .expertise-grid, .about-details') ? index * 100 : 0;
+                setTimeout(() => el.classList.add('revealed'), 900 + staggerOffset);
             } 
         });
     }, sectionObserverOptions);
 
     const elementsToAnimate = document.querySelectorAll('.scroll-animate');
-    elementsToAnimate.forEach(el => sectionObserver.observe(el));
+    elementsToAnimate.forEach(el => {
+        // Assign a stagger index for grid children so they reveal one after another
+        if (el.closest('.project-cards-grid, .expertise-grid, .about-details')) {
+            const siblings = Array.from(el.parentElement.children)
+                .filter(node => node.classList && node.classList.contains('scroll-animate'));
+            el.style.setProperty('--i', siblings.indexOf(el));
+        }
+        sectionObserver.observe(el);
+    });
 
 
     // --- 2. Sticky Header Fade-in Animation ---
@@ -29,22 +43,29 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }, 100); 
 
 
-    // --- 3. Mobile Menu Toggle ---
+    // --- 3. Mobile Menu Toggle (Professional Slide-in Sidebar) ---
     const menuToggle = document.querySelector('.menu-toggle');
     const mainNav = document.getElementById('main-nav');
+    const backdrop = document.getElementById('nav-backdrop');
     const navLinks = document.querySelectorAll('.nav-link');
 
-    function closeMobileMenu() {
+    function setMobileMenu(open) {
         if (!mainNav || !menuToggle) return;
-        mainNav.classList.remove('is-open');
-        menuToggle.classList.remove('is-active');
-        menuToggle.setAttribute('aria-expanded', 'false');
+        mainNav.classList.toggle('is-open', open);
+        menuToggle.classList.toggle('is-active', open);
+        menuToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+        if (backdrop) {
+            backdrop.classList.toggle('is-open', open);
+        }
+        document.body.classList.toggle('menu-open', open);
+    }
+
+    function closeMobileMenu() {
+        setMobileMenu(false);
     }
 
     menuToggle.addEventListener('click', () => {
-        mainNav.classList.toggle('is-open');
-        menuToggle.classList.toggle('is-active');
-        menuToggle.setAttribute('aria-expanded', mainNav.classList.contains('is-open') ? 'true' : 'false');
+        setMobileMenu(!mainNav.classList.contains('is-open'));
     });
 
     // Menu link click karne par menu close ho jaaye
@@ -56,9 +77,25 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     });
 
+    // Close when backdrop is clicked
+    if (backdrop) {
+        backdrop.addEventListener('click', () => {
+            closeMobileMenu();
+        });
+    }
+
+    // Close when the X button inside the sidebar is clicked
+    const navClose = document.querySelector('.nav-close');
+    if (navClose) {
+        navClose.addEventListener('click', () => {
+            closeMobileMenu();
+        });
+    }
+
+    // Close when clicking a menu link or its slider
     document.addEventListener('click', (event) => {
         if (!mainNav.classList.contains('is-open')) return;
-        if (mainNav.contains(event.target) || menuToggle.contains(event.target)) return;
+        if (mainNav.contains(event.target) || menuToggle.contains(event.target) || (backdrop && backdrop.contains(event.target))) return;
         closeMobileMenu();
     });
 
@@ -202,7 +239,7 @@ document.addEventListener('DOMContentLoaded', (event) => {
         anchor.addEventListener('click', function(e) {
             let href = this.getAttribute('href');
 
-            // Handle plain index.html link (Home) — smooth scroll to top
+            // Handle plain index.html link (Home)  -  smooth scroll to top
             if (href === 'index.html') {
                 const currentPage = window.location.pathname.split('/').pop() || 'index.html';
                 if (currentPage === 'index.html' || currentPage === '') {
@@ -723,11 +760,6 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
     }
 });
-
-// --- Global Email Opener ---
-function openGmail(email) {
-    window.open('https://mail.google.com/mail/?view=cm&fs=1&to=' + encodeURIComponent(email), '_blank');
-}
 
 
 
