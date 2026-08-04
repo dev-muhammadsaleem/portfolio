@@ -278,8 +278,16 @@ header {
 }
 
 header.header-visible {
-    transform: translateY(0);
+    transform: none; /* transform must be 'none' so the fixed mobile menu inside isn't trapped by the header */
     opacity: 1;
+}
+
+/* backdrop-filter is expensive on phones; it can cause menu/scroll jank */
+@media (max-width: 768px) {
+    header {
+        -webkit-backdrop-filter: none;
+        backdrop-filter: none;
+    }
 }
 
 .nav-bar {
@@ -369,7 +377,8 @@ nav a.active-link::after {
 
 /* Sidebar-only brand label & close button (hidden on desktop) */
 .nav-brand,
-.nav-close {
+.nav-close,
+.nav-socials {
     display: none;
 }
 
@@ -392,15 +401,10 @@ nav a.active-link::after {
     background-color: var(--theme-blue);
 }
 
-.menu-toggle.is-active .bar:nth-child(1) { 
-    transform: translateY(8px) rotate(45deg); 
-}
-.menu-toggle.is-active .bar:nth-child(2) { 
-    transform: rotate(90deg) scaleX(0);
-    opacity: 0; 
-}
-.menu-toggle.is-active .bar:nth-child(3) { 
-    transform: translateY(-8px) rotate(-45deg); 
+/* When the menu is open the bars keep their shape (per design choice -
+   no hamburger-to-X morph). Active state just subtly lightens the bars. */
+.menu-toggle.is-active .bar {
+    background-color: var(--theme-green-light);
 }
 
 
@@ -984,6 +988,135 @@ nav a.active-link::after {
 }
 
 
+/* --- CERTIFICATIONS SECTION --- */
+#certifications {
+    padding: 120px 20px;
+    text-align: center;
+}
+
+.cert-intro {
+    margin-bottom: 50px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+    color: #94a3b8;
+}
+
+.cert-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 28px;
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.cert-card {
+    background: linear-gradient(180deg, #1a2440, #131c33);
+    border: 1px solid #2b3a55;
+    border-radius: 18px;
+    overflow: hidden;
+    text-align: left;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.55);
+    transition: transform 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94), border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.cert-card:hover {
+    transform: translateY(-6px);
+    border-color: #58a6ff;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75), 0 0 25px rgba(88, 166, 255, 0.18);
+}
+
+.cert-preview {
+    position: relative;
+    height: 300px;
+    background: linear-gradient(160deg, #0f172a, #0b1120);
+    border-bottom: 1px solid #2b3a55;
+    overflow: hidden;
+}
+
+.cert-preview iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    pointer-events: none;
+}
+
+.cert-body {
+    padding: 24px 26px 26px;
+}
+
+.cert-badge {
+    display: inline-block;
+    padding: 4px 14px;
+    font-size: 0.72em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-light, #58a6ff);
+    background: rgba(88, 166, 255, 0.12);
+    border: 1px solid rgba(88, 166, 255, 0.35);
+    border-radius: 999px;
+    margin-bottom: 12px;
+}
+
+.cert-title {
+    margin: 0 0 6px;
+    color: #ffffff;
+    font-size: 1.2em;
+}
+
+.cert-issuer {
+    margin: 0 0 20px;
+    color: #94a3b8;
+    font-size: 0.9em;
+}
+
+.cert-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.cert-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 20px;
+    font-size: 0.9em;
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    border: 1px solid rgba(88, 166, 255, 0.45);
+    transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease;
+    touch-action: manipulation;
+}
+
+.cert-btn.cert-open {
+    background: #58a6ff;
+    color: #0b1120;
+}
+
+.cert-btn.cert-open:hover {
+    background: #79b8ff;
+    border-color: #79b8ff;
+    box-shadow: 0 0 20px rgba(88, 166, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+.cert-btn.cert-download {
+    background: transparent;
+    color: #e2e8f0;
+}
+
+.cert-btn.cert-download:hover {
+    background: rgba(88, 166, 255, 0.1);
+    border-color: #58a6ff;
+    color: #ffffff;
+    transform: translateY(-2px);
+}
+
+
 /* --- CONTACT SECTION --- */
 #contact {
     padding: 120px 20px; 
@@ -1421,16 +1554,30 @@ nav a.active-link::after {
     /* Show Hamburger Menu — Professional Slide-in Sidebar */
     .menu-toggle { display: block; }
 
-    /* Sidebar brand label (top-left) */
+    /* Sidebar brand logo (top-left) */
     .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         position: absolute;
         top: 24px;
         left: 24px;
-        font-size: 1.15em;
+        max-width: calc(100% - 90px);
+        font-size: 1.1em;
         font-weight: 700;
         color: #ffffff;
         letter-spacing: 0.01em;
         pointer-events: none;
+        z-index: 1004;
+    }
+    .nav-logo-img {
+        width: 42px;
+        height: 42px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid rgba(88, 166, 255, 0.45);
+        box-shadow: 0 0 14px rgba(88, 166, 255, 0.18);
     }
 
     /* Close (X) button (top-right) */
@@ -1468,20 +1615,22 @@ nav a.active-link::after {
         position: fixed;
         inset: 0;
         background-color: rgba(2, 6, 17, 0.62);
-        -webkit-backdrop-filter: blur(3px);
-        backdrop-filter: blur(3px);
         opacity: 0;
         visibility: hidden;
-        transition: opacity 0.35s ease, visibility 0s ease 0.35s;
+        transition: opacity 0.3s ease, visibility 0s ease 0.3s;
         z-index: 999;
     }
     .nav-backdrop.is-open {
         opacity: 1;
         visibility: visible;
-        transition: opacity 0.35s ease, visibility 0s ease;
+        transition: opacity 0.3s ease, visibility 0s ease;
     }
 
     body.menu-open {
+        overflow: hidden;
+    }
+
+    html.menu-open {
         overflow: hidden;
     }
 
@@ -1501,16 +1650,17 @@ nav a.active-link::after {
         box-shadow: -30px 0 60px rgba(0, 0, 0, 0.55);
         transform: translateX(105%);
         visibility: hidden;
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s ease 0.4s;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s ease 0.35s;
         z-index: 1002;
         overflow-y: auto;
+        overscroll-behavior: contain;
         -webkit-overflow-scrolling: touch;
     }
 
     #main-nav.is-open {
         transform: translateX(0);
         visibility: visible;
-        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s ease;
+        transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0s ease;
     }
 
     #main-nav a {
@@ -1522,7 +1672,7 @@ nav a.active-link::after {
         box-sizing: border-box;
         opacity: 0;
         transform: translateX(24px);
-        transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s ease;
+        transition: opacity 0.22s ease, transform 0.22s ease, background 0.18s ease;
         font-size: 1.05em;
         font-weight: 500;
         color: #e2e8f0;
@@ -1538,20 +1688,22 @@ nav a.active-link::after {
     }
 
     /* Staggered link reveal when opening */
-    #main-nav.is-open a:nth-child(3) { transition-delay: 0.05s; }
-    #main-nav.is-open a:nth-child(4) { transition-delay: 0.10s; }
-    #main-nav.is-open a:nth-child(5) { transition-delay: 0.15s; }
-    #main-nav.is-open a:nth-child(6) { transition-delay: 0.20s; }
-    #main-nav.is-open a:nth-child(7) { transition-delay: 0.25s; }
-    #main-nav.is-open a:nth-child(8) { transition-delay: 0.30s; }
+    #main-nav.is-open a:nth-child(3) { transition-delay: 0.03s; }
+    #main-nav.is-open a:nth-child(4) { transition-delay: 0.06s; }
+    #main-nav.is-open a:nth-child(5) { transition-delay: 0.09s; }
+    #main-nav.is-open a:nth-child(6) { transition-delay: 0.12s; }
+    #main-nav.is-open a:nth-child(7) { transition-delay: 0.15s; }
+    #main-nav.is-open a:nth-child(8) { transition-delay: 0.18s; }
+    #main-nav.is-open a:nth-child(9) { transition-delay: 0.21s; }
 
     /* Reversed stagger on close */
-    #main-nav a:nth-child(3) { transition-delay: 0.30s; }
-    #main-nav a:nth-child(4) { transition-delay: 0.25s; }
-    #main-nav a:nth-child(5) { transition-delay: 0.20s; }
-    #main-nav a:nth-child(6) { transition-delay: 0.15s; }
-    #main-nav a:nth-child(7) { transition-delay: 0.10s; }
-    #main-nav a:nth-child(8) { transition-delay: 0.05s; }
+    #main-nav a:nth-child(3) { transition-delay: 0.18s; }
+    #main-nav a:nth-child(4) { transition-delay: 0.15s; }
+    #main-nav a:nth-child(5) { transition-delay: 0.12s; }
+    #main-nav a:nth-child(6) { transition-delay: 0.09s; }
+    #main-nav a:nth-child(7) { transition-delay: 0.06s; }
+    #main-nav a:nth-child(8) { transition-delay: 0.03s; }
+    #main-nav a:nth-child(9) { transition-delay: 0s; }
 
     #main-nav a:hover {
         background: rgba(88, 166, 255, 0.08);
@@ -1566,6 +1718,60 @@ nav a.active-link::after {
         background-color: var(--theme-blue-light);
     }
 
+    /* Sidebar social icons (below links) */
+    .nav-socials {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-top: 34px;
+        padding-top: 26px;
+        border-top: 1px solid rgba(88, 166, 255, 0.18);
+    }
+    #main-nav .nav-social-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        margin: 0;
+        padding: 0 !important;
+        border: 1px solid rgba(88, 166, 255, 0.32);
+        border-bottom: 1px solid rgba(88, 166, 255, 0.32);
+        border-radius: 50%;
+        background: rgba(88, 166, 255, 0.08);
+        color: var(--accent-light);
+        text-align: center;
+        font-size: 0;
+        opacity: 0;
+        transform: translateY(14px);
+        transition: opacity 0.3s ease, transform 0.3s ease, background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    }
+    #main-nav .nav-social-link::after {
+        display: none;
+    }
+    #main-nav .nav-social-link svg {
+        width: 20px;
+        height: 20px;
+        display: block;
+        pointer-events: none;
+    }
+    #main-nav.is-open .nav-social-link {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    #main-nav .nav-social-link:hover {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #0b1120;
+        transform: translateY(-3px);
+    }
+    #main-nav.is-open .nav-social-link:nth-child(1) { transition-delay: 0.22s; }
+    #main-nav.is-open .nav-social-link:nth-child(2) { transition-delay: 0.26s; }
+    #main-nav.is-open .nav-social-link:nth-child(3) { transition-delay: 0.30s; }
+    #main-nav.is-open .nav-social-link:nth-child(4) { transition-delay: 0.34s; }
+    #main-nav.is-open .nav-social-link:nth-child(5) { transition-delay: 0.38s; }
+
 
     /* Skills grid adjustments */
     .skills-grid {
@@ -1577,6 +1783,15 @@ nav a.active-link::after {
 @media (max-width: 768px) {
     .intro-paragraph {
         font-size: 1em;
+    }
+
+    .cert-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .cert-preview {
+        height: 240px;
     }
 
     .detail-box, .extra-box {

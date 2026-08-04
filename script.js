@@ -218,6 +218,13 @@ document.addEventListener('DOMContentLoaded', (event) => {
             backdrop.classList.toggle('is-open', open);
         }
         document.body.classList.toggle('menu-open', open);
+        document.documentElement.classList.toggle('menu-open', open);
+
+        // Pause the hero particle canvas while the menu is open (saves mobile CPU/GPU)
+        if (window.__heroParticles) {
+            if (open) window.__heroParticles.pause();
+            else window.__heroParticles.resume();
+        }
     }
 
     function closeMobileMenu() {
@@ -228,8 +235,8 @@ document.addEventListener('DOMContentLoaded', (event) => {
         setMobileMenu(!mainNav.classList.contains('is-open'));
     });
 
-    // Menu link click karne par menu close ho jaaye
-    navLinks.forEach(link => {
+    // Menu link click karne par menu close ho jaaye (incl. social icons)
+    document.querySelectorAll('#main-nav a').forEach(link => {
         link.addEventListener('click', () => {
             if (mainNav.classList.contains('is-open')) {
                 closeMobileMenu();
@@ -712,65 +719,105 @@ document.addEventListener('DOMContentLoaded', (event) => {
         });
 
         // Pause particles when hero is not visible (performance)
+        let heroInView = false;
+
+        function pauseHeroParticles() {
+            if (animationId) {
+                cancelAnimationFrame(animationId);
+                animationId = null;
+            }
+        }
+
+        function resumeHeroParticles() {
+            if (heroInView && !animationId) animateParticles();
+        }
+
         const heroObserver = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    if (!animationId) animateParticles();
+                    heroInView = true;
+                    resumeHeroParticles();
                 } else {
-                    if (animationId) {
-                        cancelAnimationFrame(animationId);
-                        animationId = null;
-                    }
+                    heroInView = false;
+                    pauseHeroParticles();
                 }
             });
         }, { threshold: 0 });
         heroObserver.observe(heroSec);
+
+        // Expose controls so the mobile menu can pause/resume this canvas
+        window.__heroParticles = {
+            pause: pauseHeroParticles,
+            resume: resumeHeroParticles
+        };
     }
 
-    // --- 10. rAF-Throttled Mouse Glow + 3D Card Tilt ---
-    const mouseGlow = document.createElement('div');
-    mouseGlow.className = 'mouse-glow';
-    document.body.appendChild(mouseGlow);
+    // --- 10. Mouse Glow + 3D Card Tilt (desktop only, only runs while moving) ---
+    // Touch devices have no cursor, so this whole system is skipped.
+    // The old version ran a permanent requestAnimationFrame loop + a full-screen
+    // overlay on every device, which made the mobile menu feel laggy.
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
 
-    const tiltElements = document.querySelectorAll('.service-card, .project-card');
-    let mouseX = 0, mouseY = 0;
+    if (!isTouchDevice) {
+        const mouseGlow = document.createElement('div');
+        mouseGlow.className = 'mouse-glow';
+        document.body.appendChild(mouseGlow);
 
-    document.addEventListener('mousemove', (e) => {
-        mouseX = e.clientX;
-        mouseY = e.clientY;
-    });
+        const tiltElements = document.querySelectorAll('.service-card, .project-card');
+        let mouseX = -9999, mouseY = -9999;
+        let movePending = false;
+        let scrollPending = false;
 
-    document.addEventListener('mouseleave', () => {
-        mouseGlow.style.opacity = '0';
-    });
+        function updateMouseEffects() {
+            mouseGlow.style.left = mouseX + 'px';
+            mouseGlow.style.top = mouseY + 'px';
 
-    function handleMouseEffects() {
-        // Mouse glow
-        mouseGlow.style.left = mouseX + 'px';
-        mouseGlow.style.top = mouseY + 'px';
-        mouseGlow.style.opacity = '1';
-
-        // Card tilt
-        if (tiltElements.length > 0 && mouseX !== 0) {
-            tiltElements.forEach(element => {
-                const rect = element.getBoundingClientRect();
-                if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
-                    const x = mouseX - rect.left;
-                    const y = mouseY - rect.top;
-                    const centerX = rect.width / 2;
-                    const centerY = rect.height / 2;
-                    const rotateX = ((centerY - y) / centerY) * 8;
-                    const rotateY = ((x - centerX) / centerX) * 8;
-                    element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.04, 1.04, 1.04)`;
-                } else if (!element.matches(':hover')) {
-                    element.style.transform = '';
-                }
-            });
+            if (tiltElements.length > 0) {
+                tiltElements.forEach(element => {
+                    const rect = element.getBoundingClientRect();
+                    if (mouseX >= rect.left && mouseX <= rect.right && mouseY >= rect.top && mouseY <= rect.bottom) {
+                        const x = mouseX - rect.left;
+                        const y = mouseY - rect.top;
+                        const centerX = rect.width / 2;
+                        const centerY = rect.height / 2;
+                        const rotateX = ((centerY - y) / centerY) * 8;
+                        const rotateY = ((x - centerX) / centerX) * 8;
+                        element.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.04, 1.04, 1.04)`;
+                    } else if (!element.matches(':hover')) {
+                        element.style.transform = '';
+                    }
+                });
+            }
         }
 
-        requestAnimationFrame(handleMouseEffects);
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            mouseGlow.style.opacity = '1';
+            if (!movePending) {
+                movePending = true;
+                requestAnimationFrame(() => {
+                    movePending = false;
+                    updateMouseEffects();
+                });
+            }
+        });
+
+        // Refresh tilt when cards move under a still cursor
+        window.addEventListener('scroll', () => {
+            if (!scrollPending) {
+                scrollPending = true;
+                requestAnimationFrame(() => {
+                    scrollPending = false;
+                    updateMouseEffects();
+                });
+            }
+        }, { passive: true });
+
+        document.addEventListener('mouseleave', () => {
+            mouseGlow.style.opacity = '0';
+        });
     }
-    requestAnimationFrame(handleMouseEffects);
 
     // --- 11. Projects Filter & See More Toggle Logic ---
     const filterBtns = document.querySelectorAll('.filter-btn');
