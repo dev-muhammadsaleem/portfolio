@@ -1034,11 +1034,101 @@ nav a.active-link::after {
     overflow: hidden;
 }
 
-.cert-preview iframe {
+.cert-image {
     width: 100%;
     height: 100%;
-    border: 0;
-    pointer-events: none;
+    object-fit: contain;
+    display: block;
+    background: #ffffff;
+}
+
+.cert-fallback {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.cert-fallback.hidden {
+    display: none;
+}
+
+.cert-cover {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    text-align: center;
+    padding: 26px 30px;
+    width: 100%;
+    max-width: 320px;
+    border: 1px dashed rgba(88, 166, 255, 0.35);
+    border-radius: 14px;
+    background: linear-gradient(160deg, rgba(88, 166, 255, 0.06), rgba(11, 17, 32, 0));
+}
+
+.cert-cover-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-light, #58a6ff);
+    background: rgba(88, 166, 255, 0.12);
+    border: 1px solid rgba(88, 166, 255, 0.35);
+    border-radius: 999px;
+    margin-bottom: 8px;
+}
+
+.cert-cover-icon {
+    color: #58a6ff;
+    margin-bottom: 6px;
+}
+
+.cert-cover-icon svg {
+    width: 46px;
+    height: 46px;
+    filter: drop-shadow(0 0 10px rgba(88, 166, 255, 0.35));
+}
+
+.cert-cover-title {
+    margin: 0;
+    color: #e2e8f0;
+    font-size: 1.15em;
+    font-weight: 700;
+}
+
+.cert-cover-sub {
+    margin: 0 0 14px;
+    color: #94a3b8;
+    font-size: 0.85em;
+}
+
+.cert-cover-open {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 18px;
+    font-size: 0.85em;
+    font-weight: 600;
+    border-radius: 10px;
+    text-decoration: none;
+    background: #58a6ff;
+    color: #0b1120;
+    border: 1px solid #58a6ff;
+    transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+    touch-action: manipulation;
+}
+
+.cert-cover-open:hover {
+    background: #79b8ff;
+    border-color: #79b8ff;
+    box-shadow: 0 0 18px rgba(88, 166, 255, 0.4);
+    transform: translateY(-2px);
 }
 
 .cert-body {

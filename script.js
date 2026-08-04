@@ -195,6 +195,18 @@ document.addEventListener('DOMContentLoaded', (event) => {
     }
 
 
+    // --- 1c. Certificate Preview Image ---
+    // Static PNG rendered from the PDF. If it ever fails to load,
+    // gracefully swap in the cover fallback (Open button still works).
+    const certImage = document.getElementById('cert-image');
+    if (certImage) {
+        certImage.addEventListener('error', () => {
+            const fb = document.getElementById('cert-fallback');
+            if (fb) fb.classList.remove('hidden');
+        });
+    }
+
+
     // --- 2. Sticky Header Fade-in Animation ---
     const header = document.getElementById('main-header');
     
