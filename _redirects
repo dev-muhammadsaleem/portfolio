@@ -11,8 +11,15 @@ https://www.msaleem-builds.netlify.app/*  https://msaleem-builds.netlify.app/:sp
 /style.css*  Cache-Control: max-age=31536000, immutable
 /script.js*  Cache-Control: max-age=31536000, immutable
 /favicon.svg  Cache-Control: max-age=31536000, immutable
+/favicon.png  Cache-Control: max-age=31536000, immutable
+/apple-touch-icon.png  Cache-Control: max-age=31536000, immutable
 /pfp.jpg  Cache-Control: max-age=31536000, immutable
+/og-image.png  Cache-Control: max-age=31536000, immutable
 /msaleem-cv.pdf  Cache-Control: max-age=31536000, immutable
+/Certifications/*  Cache-Control: max-age=31536000, immutable
+
+# Prevent caching of the 404 page
+/404.html  Cache-Control: no-cache, no-store, must-revalidate
 
 # Custom 404 - Netlify auto-serves 404.html for missing files
 /*  404  /404.html

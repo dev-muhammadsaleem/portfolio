@@ -1,5 +1,12 @@
 User-agent: *
 Allow: /
+Allow: /style.css
+Allow: /script.js
+Allow: /favicon.svg
+Allow: /favicon.png
+Allow: /apple-touch-icon.png
+Allow: /pfp.jpg
+Allow: /Certifications/
 Disallow: /404.html
 
 Sitemap: https://msaleem-builds.netlify.app/sitemap.xml
