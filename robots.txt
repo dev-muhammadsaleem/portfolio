@@ -9,4 +9,4 @@ Allow: /pfp.jpg
 Allow: /Certifications/
 Disallow: /404.html
 
-Sitemap: https://msaleem-builds.netlify.app/sitemap.xml
+Sitemap: https://msaleembuilds.vercel.app/sitemap.xml

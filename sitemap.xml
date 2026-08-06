@@ -2,43 +2,36 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
         xmlns:image="http://www.google.com/schemas/sitemap-image/1.1"
         xmlns:xhtml="http://www.w3.org/1999/xhtml">
+
+  <!-- Homepage -->
   <url>
-    <loc>https://msaleem-builds.netlify.app/</loc>
+    <loc>https://msaleembuilds.vercel.app/</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
     <image:image>
-      <image:loc>https://msaleem-builds.netlify.app/pfp.jpg</image:loc>
+      <image:loc>https://msaleembuilds.vercel.app/pfp.jpg</image:loc>
       <image:title>Muhammad Saleem - Frontend and WordPress Developer</image:title>
       <image:caption>Portrait of Muhammad Saleem, frontend and WordPress developer in Pakistan.</image:caption>
     </image:image>
     <image:image>
-      <image:loc>https://msaleem-builds.netlify.app/Certifications/cert-coursera.png</image:loc>
-      <image:title>WordPress Developer Certification - Coursera</image:title>
-      <image:caption>WordPress certification earned by Muhammad Saleem through Coursera.</image:caption>
-    </image:image>
-    <image:image>
-      <image:loc>https://msaleem-builds.netlify.app/og-image.png</image:loc>
+      <image:loc>https://msaleembuilds.vercel.app/og-image.png</image:loc>
       <image:title>Muhammad Saleem - Social Share Image</image:title>
       <image:caption>Social share card for Muhammad Saleem's frontend and WordPress developer portfolio.</image:caption>
     </image:image>
+    <image:image>
+      <image:loc>https://msaleembuilds.vercel.app/Certifications/cert-coursera.png</image:loc>
+      <image:title>WordPress Developer Certification - Coursera</image:title>
+      <image:caption>WordPress certification earned by Muhammad Saleem through Coursera.</image:caption>
+    </image:image>
   </url>
+
+  <!-- Privacy Policy -->
   <url>
-    <loc>https://msaleem-builds.netlify.app/privacy-policy.html</loc>
+    <loc>https://msaleembuilds.vercel.app/privacy-policy.html</loc>
     <lastmod>2026-08-05</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.3</priority>
   </url>
-  <url>
-    <loc>https://msaleem-builds.netlify.app/Certifications/cert-coursera.pdf</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>yearly</changefreq>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://msaleem-builds.netlify.app/msaleem-cv.pdf</loc>
-    <lastmod>2026-08-05</lastmod>
-    <changefreq>monthly</changefreq>
-    <priority>0.5</priority>
-  </url>
+
 </urlset>
